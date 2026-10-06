@@ -1,0 +1,7 @@
+#!/bin/bash
+# Fresh install only: copying over a loaded driver bundle leaves stale code pages
+# and coreaudiod's helper is killed at dlopen (see driver/install.sh).
+# The bundle stays Oscilla.driver (same name as earlier builds, so upgrades replace it in place);
+# OscillaFX.driver is removed too so two plug-ins never expose the same device UID.
+rm -rf "$2/Oscilla.driver" "$2/OscillaFX.driver"
+exit 0

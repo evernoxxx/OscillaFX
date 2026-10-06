@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>OscillaFX</title>
+    <welcome file="welcome.html" mime-type="text/html"/>
+    <conclusion file="conclusion.html" mime-type="text/html"/>
+    <options customize="never" require-scripts="true" rootVolumeOnly="true" hostArchitectures="@HOST_ARCHS@"/>
+    <domains enable_localSystem="true" enable_currentUserHome="false" enable_anywhere="false"/>
+    <allowed-os-versions>
+        <os-version min="13.0"/>
+    </allowed-os-versions>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.oscilla.app.pkg"/>
+            <line choice="com.oscilla.driver.pkg"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.oscilla.app.pkg" visible="false">
+        <pkg-ref id="com.oscilla.app.pkg"/>
+    </choice>
+    <choice id="com.oscilla.driver.pkg" visible="false">
+        <pkg-ref id="com.oscilla.driver.pkg"/>
+    </choice>
+    <pkg-ref id="com.oscilla.app.pkg" version="@VERSION@" onConclusion="none">app.pkg</pkg-ref>
+    <pkg-ref id="com.oscilla.driver.pkg" version="@VERSION@" onConclusion="none">driver.pkg</pkg-ref>
+</installer-gui-script>

@@ -1,0 +1,22 @@
+#!/bin/bash
+# Mirror driver/install.sh: clean attributes, root ownership, re-sign in place,
+# then restart coreaudiod so the HAL loads the driver (audio drops ~2s).
+# No `set -e`: the old driver is already gone, so coreaudiod must restart whatever happens here.
+DRIVER="$2/Oscilla.driver"
+
+restart_coreaudiod() {
+    echo "OscillaFX postinstall: restarting coreaudiod"
+    launchctl kickstart -k system/com.apple.audio.coreaudiod 2>/dev/null || killall coreaudiod || true
+}
+trap restart_coreaudiod EXIT
+
+run() {
+    "$@" || echo "OscillaFX postinstall: '$*' failed ($?)"
+}
+
+run xattr -cr "$DRIVER"
+run chown -R root:wheel "$DRIVER"
+run chmod -R go-w "$DRIVER"
+run codesign --force --sign - --timestamp=none "$DRIVER"
+run codesign --verify --strict "$DRIVER"
+exit 0

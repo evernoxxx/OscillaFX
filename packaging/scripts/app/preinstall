@@ -1,0 +1,45 @@
+#!/bin/bash
+# Quit a running OscillaFX so it restores the real output device,
+# then remove both old bundles: stale files left inside an ad-hoc signed bundle break its seal.
+# Processes are matched by exact name only (pgrep/pkill -x), never by pattern.
+BUNDLE_ID="com.oscilla.app" # unchanged by the rename, so one AppleScript quit reaches either app
+APP_NAMES=(OscillaFX Oscilla)
+QUIT_TIMEOUT_SECONDS=10
+KILL_GRACE_SECONDS=3
+
+any_running() {
+    local name
+    for name in "${APP_NAMES[@]}"; do
+        pgrep -xq "$name" && return 0
+    done
+    return 1
+}
+
+console_user=$(stat -f %Su /dev/console)
+if any_running && [ "$console_user" != "root" ]; then
+    launchctl asuser "$(id -u "$console_user")" sudo -u "$console_user" \
+        osascript -e "tell application id \"$BUNDLE_ID\" to quit" >/dev/null 2>&1 || true
+    for _ in $(seq "$QUIT_TIMEOUT_SECONDS"); do
+        any_running || break
+        sleep 1
+    done
+fi
+# Still running (hung or no console user): SIGTERM, then SIGKILL. After a SIGKILL the crash
+# watchdog helper restores the real output device.
+if any_running; then
+    for name in "${APP_NAMES[@]}"; do
+        pkill -x "$name" || true
+    done
+    for _ in $(seq "$KILL_GRACE_SECONDS"); do
+        any_running || break
+        sleep 1
+    done
+    for name in "${APP_NAMES[@]}"; do
+        pkill -KILL -x "$name" || true
+    done
+fi
+
+for name in "${APP_NAMES[@]}"; do
+    rm -rf "$2/$name.app"
+done
+exit 0

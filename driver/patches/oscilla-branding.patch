@@ -1,0 +1,74 @@
+OscillaFX branding for upstream BlackHole.c (GPL-3.0, Copyright (C) 2019 Existential Audio Inc.).
+Applied by driver/build.sh to a copy in the build directory; third_party/BlackHole stays pristine.
+Makes every user-visible string and the CFPlugIn factory symbol configurable via -D defines.
+
+--- a/BlackHole/BlackHole.c
++++ b/BlackHole/BlackHole.c
+@@ -230,6 +230,14 @@
+ 
+ #ifndef kManufacturer_Name
+ #define                             kManufacturer_Name                  "Existential Audio Inc."
++#endif
++
++#ifndef kBox_Name
++#define                             kBox_Name                           kDriver_Name " Box"
++#endif
++
++#ifndef kFactory_Function
++#define                             kFactory_Function                   BlackHole_Create
+ #endif
+ 
+ #ifndef kLatency_Frame_Size
+@@ -348,7 +356,7 @@
+ #pragma mark Prototypes
+ 
+ //    Entry points for the COM methods
+-void*                BlackHole_Create(CFAllocatorRef inAllocator, CFUUIDRef inRequestedTypeUUID);
++void*                kFactory_Function(CFAllocatorRef inAllocator, CFUUIDRef inRequestedTypeUUID);
+ static HRESULT        BlackHole_QueryInterface(void* inDriver, REFIID inUUID, LPVOID* outInterface);
+ static ULONG        BlackHole_AddRef(void* inDriver);
+ static ULONG        BlackHole_Release(void* inDriver);
+@@ -614,7 +622,7 @@
+ 
+ #pragma mark Factory
+ 
+-void*	BlackHole_Create(CFAllocatorRef inAllocator, CFUUIDRef inRequestedTypeUUID)
++void*	kFactory_Function(CFAllocatorRef inAllocator, CFUUIDRef inRequestedTypeUUID)
+ {
+ 	//	This is the CFPlugIn factory function. Its job is to create the implementation for the given
+ 	//	type provided that the type is supported. Because this driver is simple and all its
+@@ -780,7 +788,7 @@
+ 	//	set the box name directly as a last resort
+ 	if(gBox_Name == NULL)
+ 	{
+-		gBox_Name = CFSTR("BlackHole Box");
++		gBox_Name = CFSTR(kBox_Name);
+ 	}
+ 	
+ 	//	calculate the host ticks per frame
+@@ -1912,14 +1920,14 @@
+ 		case kAudioObjectPropertyModelName:
+ 			//	This is the human readable name of the maker of the box.
+ 			FailWithAction(inDataSize < sizeof(CFStringRef), theAnswer = kAudioHardwareBadPropertySizeError, Done, "BlackHole_GetBoxPropertyData: not enough space for the return value of kAudioObjectPropertyManufacturer for the box");
+-			*((CFStringRef*)outData) = CFSTR("BlackHole");
++			*((CFStringRef*)outData) = CFSTR(kManufacturer_Name);
+ 			*outDataSize = sizeof(CFStringRef);
+ 			break;
+ 			
+ 		case kAudioObjectPropertyManufacturer:
+ 			//	This is the human readable name of the maker of the box.
+ 			FailWithAction(inDataSize < sizeof(CFStringRef), theAnswer = kAudioHardwareBadPropertySizeError, Done, "BlackHole_GetBoxPropertyData: not enough space for the return value of kAudioObjectPropertyManufacturer for the box");
+-			*((CFStringRef*)outData) = CFSTR("Existential Audio Inc.");
++			*((CFStringRef*)outData) = CFSTR(kManufacturer_Name);
+ 			*outDataSize = sizeof(CFStringRef);
+ 			break;
+ 			
+@@ -2105,7 +2113,7 @@
+ 			//	of this property should only send the notification if the hardware wants the app to
+ 			//	flash it's UI for the device.
+ 			{
+-				syslog(LOG_NOTICE, "The identify property has been set on the Box implemented by the BlackHole driver.");
++				syslog(LOG_NOTICE, "The identify property has been set on the Box implemented by the " kDriver_Name " driver.");
+ 				FailWithAction(inDataSize != sizeof(UInt32), theAnswer = kAudioHardwareBadPropertySizeError, Done, "BlackHole_SetBoxPropertyData: wrong size for the data for kAudioObjectPropertyIdentify");
+ 				dispatch_after(dispatch_time(0, 2ULL * 1000ULL * 1000ULL * 1000ULL), dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),	^()
+ 																																		{
