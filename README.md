@@ -128,7 +128,7 @@ The project was developed with AI assistance (Anthropic's Claude Code) under hum
 ## Build from source
 
 ```bash
-git clone --recurse-submodules https://github.com/EftiisSleeping/OscillaFX.git
+git clone --recurse-submodules https://github.com/evernoxxx/OscillaFX.git
 cd OscillaFX
 
 # build + tests
